@@ -33,43 +33,44 @@
       100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
     }
 
-    /* Huge Background Equalizer */
+    /* MUCH BIGGER Background Equalizer */
     .equalizer {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 65%;
+      height: 72%;
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      gap: 14px;
-      padding-bottom: 90px;
+      gap: 18px;
+      padding-bottom: 100px;
       z-index: 2;
     }
 
     .bar {
-      width: 32px;
-      background: linear-gradient(to top, #ff00ff, #00ffff, #ffff00);
-      border-radius: 10px 10px 0 0;
-      box-shadow: 0 0 30px #ff00ff,
-                  0 0 55px #00ffff,
-                  0 0 80px #ffff00;
-      animation: barMove 0.35s infinite alternate ease-in-out;
+      width: 38px;
+      background: linear-gradient(to top, #ff00ff, #00ffff, #ffff00, #ff0080);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 0 35px #ff00ff,
+                  0 0 65px #00ffff,
+                  0 0 90px #ffff00;
+      animation: barMove 0.32s infinite alternate ease-in-out;
     }
 
-    .bar:nth-child(1) { height: 40%; animation-delay: 0ms; }
-    .bar:nth-child(2) { height: 70%; animation-delay: 70ms; }
-    .bar:nth-child(3) { height: 35%; animation-delay: 140ms; }
-    .bar:nth-child(4) { height: 85%; animation-delay: 30ms; }
-    .bar:nth-child(5) { height: 55%; animation-delay: 190ms; }
-    .bar:nth-child(6) { height: 75%; animation-delay: 80ms; }
-    .bar:nth-child(7) { height: 45%; animation-delay: 120ms; }
-    .bar:nth-child(8) { height: 80%; animation-delay: 50ms; }
-    .bar:nth-child(9) { height: 60%; animation-delay: 160ms; }
+    .bar:nth-child(1) { height: 38%; animation-delay: 0ms; }
+    .bar:nth-child(2) { height: 72%; animation-delay: 60ms; }
+    .bar:nth-child(3) { height: 42%; animation-delay: 130ms; }
+    .bar:nth-child(4) { height: 88%; animation-delay: 20ms; }
+    .bar:nth-child(5) { height: 55%; animation-delay: 180ms; }
+    .bar:nth-child(6) { height: 78%; animation-delay: 70ms; }
+    .bar:nth-child(7) { height: 48%; animation-delay: 110ms; }
+    .bar:nth-child(8) { height: 82%; animation-delay: 40ms; }
+    .bar:nth-child(9) { height: 65%; animation-delay: 150ms; }
+    .bar:nth-child(10){ height: 52%; animation-delay: 90ms; }
 
     @keyframes barMove {
-      from { height: 28%; }
+      from { height: 25%; }
       to   { height: 98%; }
     }
 
@@ -109,26 +110,46 @@
       to   { background-position-y: 250px; }
     }
 
-    /* Stationary Subaru with spinning wheels */
+    /* Side road details (90s retro) */
+    .road-details {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 48%;
+      z-index: 4;
+      background: 
+        linear-gradient(90deg, transparent 20%, rgba(255,0,255,0.08) 22%, transparent 24%),
+        linear-gradient(90deg, transparent 75%, rgba(0,255,255,0.08) 77%, transparent 79%);
+      background-size: 140px 100%;
+      animation: detailsMove 1.4s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes detailsMove {
+      from { background-position-x: 0; }
+      to   { background-position-x: -140px; }
+    }
+
+    /* Purple R34 Skyline SVG - Stationary with spinning wheels */
     .car {
       position: absolute;
       bottom: 19%;
       left: 50%;
       transform: translateX(-50%);
-      width: 180px;
+      width: 210px;
       z-index: 5;
-      filter: drop-shadow(0 15px 25px #00ffff);
-      animation: carIdle 1.2s infinite alternate ease-in-out;
+      filter: drop-shadow(0 20px 30px #ff00ff);
+      animation: carIdle 1.1s infinite alternate ease-in-out;
     }
 
     @keyframes carIdle {
       from { transform: translateX(-50%) translateY(0px); }
-      to   { transform: translateX(-50%) translateY(-8px); }
+      to   { transform: translateX(-50%) translateY(-6px); }
     }
 
-    /* Wheel spinning */
     .wheel {
-      animation: spin 0.4s linear infinite;
+      animation: spin 0.35s linear infinite;
     }
 
     @keyframes spin {
@@ -139,8 +160,9 @@
 </head>
 <body>
 
-  <!-- Background Equalizer -->
+  <!-- Background Equalizer - Much Bigger -->
   <div class="equalizer">
+    <div class="bar"></div>
     <div class="bar"></div>
     <div class="bar"></div>
     <div class="bar"></div>
@@ -155,29 +177,43 @@
   <!-- Road -->
   <div class="road"></div>
 
-  <!-- Subaru Car (SVG) - Stationary with spinning wheels -->
-  <svg class="car" viewBox="0 0 240 90" xmlns="http://www.w3.org/2000/svg">
-    <!-- Car body -->
-    <path d="M30 55 Q30 35 55 32 Q120 20 185 32 Q210 38 215 55 Q215 70 200 75 L45 75 Q35 70 30 55" fill="#1a1a2e" stroke="#00ffff" stroke-width="8"/>
+  <!-- Side road details -->
+  <div class="road-details"></div>
+
+  <!-- Purple R34 Skyline SVG -->
+  <svg class="car" viewBox="0 0 260 110" xmlns="http://www.w3.org/2000/svg">
+    <!-- Main body - Deep Purple -->
+    <path d="M25 68 Q25 48 48 42 Q105 28 195 38 Q225 45 235 65 Q235 82 215 88 L45 88 Q30 82 25 68" fill="#4a1c4a" stroke="#00ffff" stroke-width="12"/>
+    
+    <!-- Lower body accent -->
+    <path d="M35 78 Q45 85 210 85 L215 78" fill="#2a0a2a"/>
+    
     <!-- Windows -->
-    <path d="M65 38 Q85 28 115 28 Q145 28 165 40 L160 50 L75 50 Z" fill="#0a0a1f" stroke="#00ffff" stroke-width="4"/>
+    <path d="M65 48 Q85 38 125 38 Q165 40 185 52 L175 65 L75 65 Z" fill="#0f1428" stroke="#00ffff" stroke-width="6"/>
+    
     <!-- Headlights -->
-    <rect x="205" y="52" width="12" height="18" rx="3" fill="#ffff00"/>
+    <rect x="220" y="62" width="18" height="16" rx="4" fill="#ffee00"/>
     <!-- Taillights -->
-    <rect x="25" y="55" width="10" height="14" rx="2" fill="#ff0080"/>
+    <rect x="22" y="65" width="14" height="18" rx="3" fill="#ff0088"/>
+    
+    <!-- Front bumper & grille area -->
+    <rect x="28" y="70" width="45" height="12" rx="4" fill="#1a1a2a"/>
     
     <!-- Wheels -->
     <g class="wheel">
-      <circle cx="70" cy="75" r="18" fill="#0f0f1f" stroke="#00ffff" stroke-width="10"/>
-      <circle cx="70" cy="75" r="10" fill="#222"/>
+      <circle cx="75" cy="88" r="22" fill="#111" stroke="#00ffff" stroke-width="12"/>
+      <circle cx="75" cy="88" r="13" fill="#222"/>
+      <circle cx="75" cy="88" r="7" fill="#444"/>
     </g>
     <g class="wheel">
-      <circle cx="165" cy="75" r="18" fill="#0f0f1f" stroke="#00ffff" stroke-width="10"/>
-      <circle cx="165" cy="75" r="10" fill="#222"/>
+      <circle cx="175" cy="88" r="22" fill="#111" stroke="#00ffff" stroke-width="12"/>
+      <circle cx="175" cy="88" r="13" fill="#222"/>
+      <circle cx="175" cy="88" r="7" fill="#444"/>
     </g>
 
-    <!-- Subaru spoiler -->
-    <rect x="175" y="32" width="35" height="6" rx="2" fill="#ff00ff"/>
+    <!-- Spoiler -->
+    <rect x="185" y="38" width="48" height="9" rx="2" fill="#ff00aa"/>
+    <polygon points="185,38 233,38 228,32" fill="#c00080"/>
   </svg>
 
 </body>
