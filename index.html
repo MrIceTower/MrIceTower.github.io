@@ -12,24 +12,25 @@
       overflow: hidden;
       background: linear-gradient(to bottom, #0a0022, #1a0033, #000);
       position: relative;
-      font-family: 'Courier New', monospace;
     }
 
-    /* Background Color Shift - 90s Neon */
+    /* Smooth 90s Neon Background Shift - every 15s */
     body::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, #00ffff, #ff00ff, #ffff00, #00ff00);
-      opacity: 0.15;
+      background: linear-gradient(135deg, #00ffff, #ff00ff, #ffff00, #ff0080, #00ffcc);
+      opacity: 0.18;
       animation: bgShift 15s infinite linear;
       z-index: 1;
     }
 
     @keyframes bgShift {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0%   { background-position: 0% 50%; filter: hue-rotate(0deg); }
+      25%  { background-position: 50% 50%; filter: hue-rotate(70deg); }
+      50%  { background-position: 100% 50%; filter: hue-rotate(140deg); }
+      75%  { background-position: 50% 50%; filter: hue-rotate(200deg); }
+      100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
     }
 
     /* Huge Background Equalizer */
@@ -42,34 +43,34 @@
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      gap: 12px;
-      padding-bottom: 80px;
+      gap: 14px;
+      padding-bottom: 90px;
       z-index: 2;
-      filter: blur(1px);
     }
 
     .bar {
-      width: 28px;
+      width: 32px;
       background: linear-gradient(to top, #ff00ff, #00ffff, #ffff00);
-      border-radius: 8px 8px 0 0;
-      box-shadow: 0 0 25px #ff00ff,
-                  0 0 45px #00ffff;
-      animation: barMove 0.4s infinite alternate ease-in-out;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 0 0 30px #ff00ff,
+                  0 0 55px #00ffff,
+                  0 0 80px #ffff00;
+      animation: barMove 0.35s infinite alternate ease-in-out;
     }
 
-    .bar:nth-child(1) { height: 45%; animation-delay: 0ms; }
-    .bar:nth-child(2) { height: 65%; animation-delay: 80ms; }
-    .bar:nth-child(3) { height: 35%; animation-delay: 150ms; }
-    .bar:nth-child(4) { height: 80%; animation-delay: 40ms; }
-    .bar:nth-child(5) { height: 55%; animation-delay: 200ms; }
-    .bar:nth-child(6) { height: 70%; animation-delay: 90ms; }
-    .bar:nth-child(7) { height: 40%; animation-delay: 130ms; }
-    .bar:nth-child(8) { height: 75%; animation-delay: 60ms; }
-    .bar:nth-child(9) { height: 50%; animation-delay: 170ms; }
+    .bar:nth-child(1) { height: 40%; animation-delay: 0ms; }
+    .bar:nth-child(2) { height: 70%; animation-delay: 70ms; }
+    .bar:nth-child(3) { height: 35%; animation-delay: 140ms; }
+    .bar:nth-child(4) { height: 85%; animation-delay: 30ms; }
+    .bar:nth-child(5) { height: 55%; animation-delay: 190ms; }
+    .bar:nth-child(6) { height: 75%; animation-delay: 80ms; }
+    .bar:nth-child(7) { height: 45%; animation-delay: 120ms; }
+    .bar:nth-child(8) { height: 80%; animation-delay: 50ms; }
+    .bar:nth-child(9) { height: 60%; animation-delay: 160ms; }
 
     @keyframes barMove {
-      from { height: 30%; }
-      to   { height: 95%; }
+      from { height: 28%; }
+      to   { height: 98%; }
     }
 
     /* Road */
@@ -78,10 +79,10 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 45%;
-      background: linear-gradient(to bottom, transparent, #111);
+      height: 48%;
+      background: linear-gradient(to bottom, transparent, #0f0f1f);
       z-index: 3;
-      perspective: 800px;
+      perspective: 900px;
     }
 
     .road::before {
@@ -89,48 +90,50 @@
       position: absolute;
       bottom: 0;
       left: 50%;
-      width: 120%;
+      width: 140%;
       height: 100%;
       background: repeating-linear-gradient(
         to bottom,
         transparent 0px,
-        transparent 40px,
-        #ff00ff 40px,
-        #ff00ff 45px
+        transparent 38px,
+        #ff00ff 38px,
+        #ff00ff 44px
       );
-      transform: rotateX(75deg) scale(1.5);
-      animation: roadMove 1.8s linear infinite;
-      opacity: 0.7;
+      transform: rotateX(72deg) scale(1.6);
+      animation: roadMove 1.4s linear infinite;
+      opacity: 0.75;
     }
 
     @keyframes roadMove {
       from { background-position-y: 0; }
-      to   { background-position-y: 200px; }
+      to   { background-position-y: 250px; }
     }
 
-    /* Subaru Car */
+    /* Stationary Subaru with spinning wheels */
     .car {
       position: absolute;
-      bottom: 18%;
-      left: 45%;
-      font-size: 90px;
+      bottom: 19%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
       z-index: 5;
-      animation: driveForward 8s linear infinite;
-      filter: drop-shadow(0 0 20px #00ffff);
+      filter: drop-shadow(0 15px 25px #00ffff);
+      animation: carIdle 1.2s infinite alternate ease-in-out;
     }
 
-    @keyframes driveForward {
-      0%   { transform: translateX(-120px) scale(0.7); }
-      100% { transform: translateX(180px) scale(1.1); }
+    @keyframes carIdle {
+      from { transform: translateX(-50%) translateY(0px); }
+      to   { transform: translateX(-50%) translateY(-8px); }
     }
 
-    /* Overlay glow */
-    .overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(circle at center, transparent 40%, rgba(10, 0, 40, 0.6));
-      z-index: 4;
-      pointer-events: none;
+    /* Wheel spinning */
+    .wheel {
+      animation: spin 0.4s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -152,10 +155,30 @@
   <!-- Road -->
   <div class="road"></div>
 
-  <!-- Car -->
-  <div class="car">🚗</div>
+  <!-- Subaru Car (SVG) - Stationary with spinning wheels -->
+  <svg class="car" viewBox="0 0 240 90" xmlns="http://www.w3.org/2000/svg">
+    <!-- Car body -->
+    <path d="M30 55 Q30 35 55 32 Q120 20 185 32 Q210 38 215 55 Q215 70 200 75 L45 75 Q35 70 30 55" fill="#1a1a2e" stroke="#00ffff" stroke-width="8"/>
+    <!-- Windows -->
+    <path d="M65 38 Q85 28 115 28 Q145 28 165 40 L160 50 L75 50 Z" fill="#0a0a1f" stroke="#00ffff" stroke-width="4"/>
+    <!-- Headlights -->
+    <rect x="205" y="52" width="12" height="18" rx="3" fill="#ffff00"/>
+    <!-- Taillights -->
+    <rect x="25" y="55" width="10" height="14" rx="2" fill="#ff0080"/>
+    
+    <!-- Wheels -->
+    <g class="wheel">
+      <circle cx="70" cy="75" r="18" fill="#0f0f1f" stroke="#00ffff" stroke-width="10"/>
+      <circle cx="70" cy="75" r="10" fill="#222"/>
+    </g>
+    <g class="wheel">
+      <circle cx="165" cy="75" r="18" fill="#0f0f1f" stroke="#00ffff" stroke-width="10"/>
+      <circle cx="165" cy="75" r="10" fill="#222"/>
+    </g>
 
-  <div class="overlay"></div>
+    <!-- Subaru spoiler -->
+    <rect x="175" y="32" width="35" height="6" rx="2" fill="#ff00ff"/>
+  </svg>
 
 </body>
 </html>
