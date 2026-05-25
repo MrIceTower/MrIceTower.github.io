@@ -1,2 +1,2 @@
-# MrIceTower.githhub.io
+# MrIceTower.github.io
 Loovkood Saaremaa gümnaasium
