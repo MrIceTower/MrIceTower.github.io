@@ -1,220 +1,510 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>90s Retro Equalizer Drive</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neon Night Drive</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      height: 100vh;
-      overflow: hidden;
-      background: linear-gradient(to bottom, #0a0022, #1a0033, #000);
-      position: relative;
-    }
-
-    /* Smooth 90s Neon Background Shift - every 15s */
-    body::before {
-      content: '';
+    * { box-sizing: border-box; }
+    body, html { margin: 0; padding: 0; overflow: hidden; background: #05040f; color: #fff; font-family: 'Segoe UI', sans-serif; }
+    #app { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+    canvas { position: absolute; inset: 0; display: block; }
+    .hud {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, #00ffff, #ff00ff, #ffff00, #ff0080, #00ffcc);
-      opacity: 0.18;
-      animation: bgShift 15s infinite linear;
-      z-index: 1;
+      right: 20px;
+      top: 20px;
+      width: 320px;
+      max-width: calc(100vw - 40px);
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 22px;
+      backdrop-filter: blur(18px);
+      background: rgba(6, 6, 18, 0.75);
+      box-shadow: 0 20px 90px rgba(0,0,0,.35);
+      z-index: 10;
     }
-
-    @keyframes bgShift {
-      0%   { background-position: 0% 50%; filter: hue-rotate(0deg); }
-      25%  { background-position: 50% 50%; filter: hue-rotate(70deg); }
-      50%  { background-position: 100% 50%; filter: hue-rotate(140deg); }
-      75%  { background-position: 50% 50%; filter: hue-rotate(200deg); }
-      100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
-    }
-
-    /* MUCH BIGGER Background Equalizer */
-    .equalizer {
-      position: absolute;
-      bottom: 0;
-      left: 0;
+    .hud h1 { margin: 0 0 10px; font-size: 20px; letter-spacing: 0.02em; }
+    .hud p { margin: 0 0 12px; line-height: 1.4; color: #C9D1FF; }
+    .player { display: grid; gap: 10px; }
+    .player button,
+    .player select,
+    .player input[type=range] {
       width: 100%;
-      height: 72%;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 18px;
-      padding-bottom: 100px;
-      z-index: 2;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
     }
-
-    .bar {
-      width: 38px;
-      background: linear-gradient(to top, #ff00ff, #00ffff, #ffff00, #ff0080);
-      border-radius: 12px 12px 0 0;
-      box-shadow: 0 0 35px #ff00ff,
-                  0 0 65px #00ffff,
-                  0 0 90px #ffff00;
-      animation: barMove 0.32s infinite alternate ease-in-out;
+    .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .actions button { padding: 12px 0; font-weight: 700; }
+    .track-info { display: grid; gap: 4px; }
+    .track-info .label { font-size: 12px; color: #8e9eff; text-transform: uppercase; letter-spacing: .12em; }
+    .track-info .value { font-size: 15px; }
+    .meter { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .meter span { display: block; height: 8px; background: rgba(255,255,255,.12); border-radius: 999px; overflow: hidden; position: relative; }
+    .meter span::after { content: '';
+      position: absolute; inset: 0;
+      width: 0%;
+      background: linear-gradient(90deg, #6b9dff, #f94cff, #1bc7ff);
+      transition: width 0.1s ease;
     }
-
-    .bar:nth-child(1) { height: 38%; animation-delay: 0ms; }
-    .bar:nth-child(2) { height: 72%; animation-delay: 60ms; }
-    .bar:nth-child(3) { height: 42%; animation-delay: 130ms; }
-    .bar:nth-child(4) { height: 88%; animation-delay: 20ms; }
-    .bar:nth-child(5) { height: 55%; animation-delay: 180ms; }
-    .bar:nth-child(6) { height: 78%; animation-delay: 70ms; }
-    .bar:nth-child(7) { height: 48%; animation-delay: 110ms; }
-    .bar:nth-child(8) { height: 82%; animation-delay: 40ms; }
-    .bar:nth-child(9) { height: 65%; animation-delay: 150ms; }
-    .bar:nth-child(10){ height: 52%; animation-delay: 90ms; }
-
-    @keyframes barMove {
-      from { height: 25%; }
-      to   { height: 98%; }
-    }
-
-    /* Road */
-    .road {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 48%;
-      background: linear-gradient(to bottom, transparent, #0f0f1f);
-      z-index: 3;
-      perspective: 900px;
-    }
-
-    .road::before {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 140%;
-      height: 100%;
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 38px,
-        #ff00ff 38px,
-        #ff00ff 44px
-      );
-      transform: rotateX(72deg) scale(1.6);
-      animation: roadMove 1.4s linear infinite;
-      opacity: 0.75;
-    }
-
-    @keyframes roadMove {
-      from { background-position-y: 0; }
-      to   { background-position-y: 250px; }
-    }
-
-    /* Side road details (90s retro) */
-    .road-details {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 48%;
-      z-index: 4;
-      background: 
-        linear-gradient(90deg, transparent 20%, rgba(255,0,255,0.08) 22%, transparent 24%),
-        linear-gradient(90deg, transparent 75%, rgba(0,255,255,0.08) 77%, transparent 79%);
-      background-size: 140px 100%;
-      animation: detailsMove 1.4s linear infinite;
-      opacity: 0.6;
-    }
-
-    @keyframes detailsMove {
-      from { background-position-x: 0; }
-      to   { background-position-x: -140px; }
-    }
-
-    /* Purple R34 Skyline SVG - Stationary with spinning wheels */
-    .car {
-      position: absolute;
-      bottom: 19%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 210px;
-      z-index: 5;
-      filter: drop-shadow(0 20px 30px #ff00ff);
-      animation: carIdle 1.1s infinite alternate ease-in-out;
-    }
-
-    @keyframes carIdle {
-      from { transform: translateX(-50%) translateY(0px); }
-      to   { transform: translateX(-50%) translateY(-6px); }
-    }
-
-    .wheel {
-      animation: spin 0.35s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
+    .file-row { display: flex; gap: 10px; align-items: center; }
+    .file-row label { flex: 1; display: block; cursor: pointer; }
+    .file-row input[type=file] { width: 100%; }
   </style>
 </head>
 <body>
-
-  <!-- Background Equalizer - Much Bigger -->
-  <div class="equalizer">
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
+  <div id="app">
+    <canvas id="scene"></canvas>
+    <div class="hud">
+      <h1>Neon Night Drive</h1>
+      <p>Load a track or choose a sample. The city road, stars, headlights, and car react to bass, treble and beat.</p>
+      <div class="player">
+        <div class="track-info">
+          <span class="label">Current palette</span>
+          <span class="value" id="moodLabel">Electric Blue</span>
+        </div>
+        <select id="presetSelect">
+          <option value="electric">Electric Blue</option>
+          <option value="sunset">Sunset Pulse</option>
+          <option value="violet">Violet Drift</option>
+          <option value="cyber">Cyberwave</option>
+        </select>
+        <div class="file-row">
+          <input id="fileInput" type="file" accept="audio/*" />
+        </div>
+        <select id="sampleSelect">
+          <option value="">Choose sample track</option>
+          <option value="https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3">Sample 1</option>
+          <option value="https://interactive-examples.mdn.mozilla.net/media/examples/flower.mp3">Sample 2</option>
+        </select>
+        <div class="actions">
+          <button id="prevBtn">Prev</button>
+          <button id="playBtn">Play</button>
+          <button id="nextBtn">Next</button>
+        </div>
+        <input id="volume" type="range" min="0" max="1" step="0.01" value="0.75" />
+        <div class="meter">
+          <span><span id="bassMeter"></span></span>
+          <span><span id="midMeter"></span></span>
+          <span><span id="trebleMeter"></span></span>
+        </div>
+      </div>
+    </div>
   </div>
+  <audio id="audio" crossorigin="anonymous"></audio>
+  <script>
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d');
+    const audioEl = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const volumeControl = document.getElementById('volume');
+    const fileInput = document.getElementById('fileInput');
+    const sampleSelect = document.getElementById('sampleSelect');
+    const presetSelect = document.getElementById('presetSelect');
+    const moodLabel = document.getElementById('moodLabel');
+    const bassMeter = document.getElementById('bassMeter');
+    const midMeter = document.getElementById('midMeter');
+    const trebleMeter = document.getElementById('trebleMeter');
 
-  <!-- Road -->
-  <div class="road"></div>
+    const presets = {
+      electric: {
+        sky: ['#09102a', '#0a1136', '#1d2c76'],
+        road: ['#0c0d16', '#11151f'],
+        glow: '#3bd7ff',
+        stars: '#8dc8ff',
+        car: '#46e3ff',
+        accent: '#ff4ceb'
+      },
+      sunset: {
+        sky: ['#21021f', '#2f072c', '#6d103f'],
+        road: ['#120a10', '#221018'],
+        glow: '#ff9d3f',
+        stars: '#ffd785',
+        car: '#ff5f85',
+        accent: '#ffd65a'
+      },
+      violet: {
+        sky: ['#12041c', '#1b0d30', '#3c1b68'],
+        road: ['#130c17', '#1a1026'],
+        glow: '#a96cff',
+        stars: '#dabcff',
+        car: '#d3a0ff',
+        accent: '#5fd6ff'
+      },
+      cyber: {
+        sky: ['#020714', '#05183d', '#0d2e83'],
+        road: ['#05091d', '#09122f'],
+        glow: '#00f4d4',
+        stars: '#8bfffa',
+        car: '#71f5ff',
+        accent: '#ff60f0'
+      }
+    };
 
-  <!-- Side road details -->
-  <div class="road-details"></div>
+    const playlist = [
+      { title: 'Offline drive', src: '' },
+      { title: 'Sample 1', src: 'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3' },
+      { title: 'Sample 2', src: 'https://interactive-examples.mdn.mozilla.net/media/examples/flower.mp3' }
+    ];
+    let currentIndex = 0;
 
-  <!-- Purple R34 Skyline SVG -->
-  <svg class="car" viewBox="0 0 260 110" xmlns="http://www.w3.org/2000/svg">
-    <!-- Main body - Deep Purple -->
-    <path d="M25 68 Q25 48 48 42 Q105 28 195 38 Q225 45 235 65 Q235 82 215 88 L45 88 Q30 82 25 68" fill="#4a1c4a" stroke="#00ffff" stroke-width="12"/>
-    
-    <!-- Lower body accent -->
-    <path d="M35 78 Q45 85 210 85 L215 78" fill="#2a0a2a"/>
-    
-    <!-- Windows -->
-    <path d="M65 48 Q85 38 125 38 Q165 40 185 52 L175 65 L75 65 Z" fill="#0f1428" stroke="#00ffff" stroke-width="6"/>
-    
-    <!-- Headlights -->
-    <rect x="220" y="62" width="18" height="16" rx="4" fill="#ffee00"/>
-    <!-- Taillights -->
-    <rect x="22" y="65" width="14" height="18" rx="3" fill="#ff0088"/>
-    
-    <!-- Front bumper & grille area -->
-    <rect x="28" y="70" width="45" height="12" rx="4" fill="#1a1a2a"/>
-    
-    <!-- Wheels -->
-    <g class="wheel">
-      <circle cx="75" cy="88" r="22" fill="#111" stroke="#00ffff" stroke-width="12"/>
-      <circle cx="75" cy="88" r="13" fill="#222"/>
-      <circle cx="75" cy="88" r="7" fill="#444"/>
-    </g>
-    <g class="wheel">
-      <circle cx="175" cy="88" r="22" fill="#111" stroke="#00ffff" stroke-width="12"/>
-      <circle cx="175" cy="88" r="13" fill="#222"/>
-      <circle cx="175" cy="88" r="7" fill="#444"/>
-    </g>
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
-    <!-- Spoiler -->
-    <rect x="185" y="38" width="48" height="9" rx="2" fill="#ff00aa"/>
-    <polygon points="185,38 233,38 228,32" fill="#c00080"/>
-  </svg>
+    let audioCtx;
+    let analyser;
+    let dataArray;
+    let sourceNode;
+    let smoothing = 0.82;
+    let bassLevel = 0;
+    let midLevel = 0;
+    let trebleLevel = 0;
+    let beatLevel = 0;
+    let lastBeat = 0;
+    let beatCooldown = 0;
+    let time = 0;
+    let speed = 1;
+    let stars = [];
+    let roadSegments = [];
+    let palette = presets.electric;
+    let moodState = 'electric';
 
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    function createAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = smoothing;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        sourceNode = audioCtx.createMediaElementSource(audioEl);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+      }
+    }
+
+    function loadSong(index) {
+      if (playlist[index].src) {
+        audioEl.src = playlist[index].src;
+      }
+    }
+
+    function pickPalette(key) {
+      palette = presets[key] || presets.electric;
+      moodLabel.textContent = key.replace(/^(.)/, c => c.toUpperCase());
+      moodState = key;
+    }
+
+    function updateAudioValues() {
+      if (!analyser) return;
+      analyser.getByteFrequencyData(dataArray);
+      const bass = averageRange(20, 80);
+      const mids = averageRange(81, 300);
+      const treb = averageRange(301, 1024);
+      bassLevel = Math.max(bassLevel * 0.92, bass / 255);
+      midLevel = Math.max(midLevel * 0.92, mids / 255);
+      trebleLevel = Math.max(trebleLevel * 0.92, treb / 255);
+      bassMeter.style.setProperty('--value', (bassLevel * 100) + '%');
+      midMeter.style.setProperty('--value', (midLevel * 100) + '%');
+      trebleMeter.style.setProperty('--value', (trebleLevel * 100) + '%');
+      bassMeter.style.width = `${Math.min(100, bassLevel * 120)}%`;
+      midMeter.style.width = `${Math.min(100, midLevel * 120)}%`;
+      trebleMeter.style.width = `${Math.min(100, trebleLevel * 120)}%`;
+      const now = performance.now();
+      const beatDetect = bassLevel * 1.4 + midLevel * 0.5;
+      if (beatDetect > 0.6 && now - lastBeat > 250) {
+        beatLevel = 1;
+        lastBeat = now;
+      }
+      beatLevel = Math.max(0, beatLevel - 0.04);
+    }
+
+    function averageRange(minHz, maxHz) {
+      const nyquist = audioCtx.sampleRate / 2;
+      const start = Math.floor(minHz / nyquist * dataArray.length);
+      const end = Math.min(dataArray.length - 1, Math.floor(maxHz / nyquist * dataArray.length));
+      let sum = 0;
+      let count = 0;
+      for (let i = start; i <= end; i++) {
+        sum += dataArray[i];
+        count++;
+      }
+      return count ? sum / count : 0;
+    }
+
+    function initStars() {
+      stars = Array.from({ length: 120 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height * 0.6,
+        radius: Math.random() * 1.8 + 0.8,
+        brightness: Math.random() * 0.5 + 0.3,
+        phase: Math.random() * Math.PI * 2
+n      }));
+    }
+
+    function initRoad() {
+      roadSegments = [];
+      const segmentCount = 28;
+      for (let i = 0; i < segmentCount; i++) {
+        roadSegments.push({ z: i / segmentCount, wobble: Math.sin(i * 0.8) * 120 });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      drawSky();
+      drawStars();
+      drawRoad();
+      drawRoadGlow();
+      drawCar();
+      drawHeadlights();
+      drawParticles();
+      time += 0.016;
+      requestAnimationFrame(draw);
+    }
+
+    function drawSky() {
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      palette.sky.forEach((color, index) => gradient.addColorStop(index / (palette.sky.length - 1), color));
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const glow = 25 + bassLevel * 120;
+      ctx.fillStyle = `rgba(255,255,255,${0.04 + trebleLevel * 0.2})`;
+      ctx.shadowColor = palette.accent;
+      ctx.shadowBlur = glow;
+      ctx.fillRect(width * 0.3, height * 0.1, width * 0.45, height * 0.18);
+      ctx.restore();
+    }
+
+    function drawStars() {
+      stars.forEach(star => {
+        const pulse = Math.sin(time * 3 + star.phase) * 0.3 + 0.7 + trebleLevel * 0.8;
+        const brightness = star.brightness + pulse * 0.3;
+        ctx.fillStyle = `rgba(255,255,255,${brightness})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius * (1 + trebleLevel * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawRoad() {
+      const roadBaseY = height * 0.65;
+      roadSegments.forEach((segment, i) => {
+        const perspective = (i + 1) / roadSegments.length;
+        const segmentWidth = width * (0.7 - perspective * 0.55);
+        const x = width / 2 + segment.wobble * (1 - perspective) * 0.7;
+        const y = roadBaseY + perspective * height * 0.35;
+        const alpha = 0.12 + perspective * 0.2 + bassLevel * 0.15;
+        ctx.fillStyle = `rgba(15,18,34,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(width * 0.5 - segmentWidth / 2, y);
+        ctx.lineTo(width * 0.5 + segmentWidth / 2, y);
+        ctx.lineTo(width * 0.5 + segmentWidth / 2 - 20, y + 72);
+        ctx.lineTo(width * 0.5 - segmentWidth / 2 + 20, y + 72);
+        ctx.closePath();
+        ctx.fill();
+      });
+    }
+
+    function drawRoadGlow() {
+      const roadBaseY = height * 0.65;
+      const glowWidth = 360 + bassLevel * 520;
+      const glowAlpha = 0.12 + bassLevel * 0.35;
+      const x = width / 2;
+      const y = roadBaseY + 50;
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, glowWidth);
+      grad.addColorStop(0, hexAlpha(palette.glow, glowAlpha));
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, y, glowWidth, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawCar() {
+      const carWidth = 320;
+      const carHeight = 100;
+      const x = width / 2;
+      const y = height * 0.67 - beatLevel * 15;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.shadowBlur = 32 + bassLevel * 55;
+      ctx.shadowColor = palette.accent;
+      ctx.fillStyle = palette.car;
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-carWidth * 0.45, 7);
+      ctx.bezierCurveTo(-carWidth * 0.4, -40, -carWidth * 0.22, -54, -carWidth * 0.05, -48);
+      ctx.lineTo(carWidth * 0.15, -40);
+      ctx.quadraticCurveTo(carWidth * 0.35, -36, carWidth * 0.44, -18);
+      ctx.lineTo(carWidth * 0.45, 6);
+      ctx.lineTo(carWidth * 0.4, 18);
+      ctx.quadraticCurveTo(carWidth * 0.05, 42, -carWidth * 0.38, 24);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#09131f';
+      ctx.beginPath();
+      ctx.moveTo(-carWidth * 0.33, 5);
+      ctx.lineTo(-carWidth * 0.18, -24);
+      ctx.lineTo(carWidth * 0.02, -24);
+      ctx.lineTo(carWidth * 0.1, 2);
+      ctx.lineTo(-carWidth * 0.33, 5);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(carWidth * 0.1, 2);
+      ctx.lineTo(carWidth * 0.28, -24);
+      ctx.lineTo(carWidth * 0.40, -24);
+      ctx.lineTo(carWidth * 0.30, 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-carWidth * 0.32, -10);
+      ctx.lineTo(-carWidth * 0.1, -14);
+      ctx.lineTo(carWidth * 0.08, -12);
+      ctx.lineTo(carWidth * 0.28, -8);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawHeadlights() {
+      const x = width / 2;
+      const y = height * 0.69 - beatLevel * 15;
+      const flash = 0.7 + beatLevel * 0.5;
+      const left = x - 120;
+      const right = x + 120;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const soft = ctx.createRadialGradient(left, y + 10, 0, left, y + 10, 170);
+      soft.addColorStop(0, `rgba(255, 255, 214, ${0.12 * flash})`);
+      soft.addColorStop(1, 'rgba(255,255,214,0)');
+      ctx.fillStyle = soft;
+      ctx.fillRect(left - 180, y - 10, 360, 180);
+      const soft2 = ctx.createRadialGradient(right, y + 10, 0, right, y + 10, 170);
+      soft2.addColorStop(0, `rgba(255, 255, 214, ${0.12 * flash})`);
+      soft2.addColorStop(1, 'rgba(255,255,214,0)');
+      ctx.fillStyle = soft2;
+      ctx.fillRect(right - 180, y - 10, 360, 180);
+      ctx.restore();
+    }
+
+    function drawParticles() {
+      const particleCount = 18;
+      for (let i = 0; i < particleCount; i++) {
+        const px = width / 2 + Math.sin(time * 2.1 + i) * 220;
+        const py = height * 0.57 + (i - particleCount / 2) * 10 + Math.cos(time * 1.8 + i * 0.8) * 12;
+        const alpha = 0.2 + bassLevel * 0.5 + Math.abs(Math.sin(time * 3 + i)) * 0.12;
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(px, py, 3 + trebleLevel * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function loop() {
+      updateAudioValues();
+      requestAnimationFrame(loop);
+    }
+
+    function hexAlpha(hex, alpha) {
+      const clean = hex.replace('#', '');
+      const num = parseInt(clean, 16);
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    function init() {
+      initStars();
+      initRoad();
+      createAudio();
+      loadSong(currentIndex);
+      pickPalette(moodState);
+      draw();
+      loop();
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      if (audioEl.paused) {
+        audioEl.play();
+        playBtn.textContent = 'Pause';
+      } else {
+        audioEl.pause();
+        playBtn.textContent = 'Play';
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      loadSong(currentIndex);
+      audioEl.play();
+      playBtn.textContent = 'Pause';
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % playlist.length;
+      loadSong(currentIndex);
+      audioEl.play();
+      playBtn.textContent = 'Pause';
+    });
+
+    volumeControl.addEventListener('input', () => {
+      audioEl.volume = volumeControl.value;
+    });
+
+    fileInput.addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      audioEl.src = url;
+      audioEl.play();
+      playBtn.textContent = 'Pause';
+    });
+
+    sampleSelect.addEventListener('change', event => {
+      const src = event.target.value;
+      if (!src) return;
+      audioEl.src = src;
+      audioEl.play();
+      playBtn.textContent = 'Pause';
+    });
+
+    presetSelect.addEventListener('change', event => {
+      pickPalette(event.target.value);
+    });
+
+    window.addEventListener('resize', () => {
+      resize();
+      initStars();
+      initRoad();
+    });
+
+    init();
+  </script>
 </body>
 </html>
