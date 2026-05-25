@@ -13,19 +13,42 @@
       position: absolute;
       right: 20px;
       top: 20px;
-      width: 320px;
+      width: 340px;
       max-width: calc(100vw - 40px);
-      padding: 18px;
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 22px;
-      backdrop-filter: blur(18px);
-      background: rgba(6, 6, 18, 0.75);
-      box-shadow: 0 20px 90px rgba(0,0,0,.35);
+      padding: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 28px;
+      backdrop-filter: blur(20px);
+      background: linear-gradient(180deg, rgba(12,14,30,0.95), rgba(2,4,14,0.92));
+      box-shadow: 0 24px 120px rgba(0,0,0,.35);
       z-index: 10;
+      overflow: hidden;
     }
-    .hud h1 { margin: 0 0 10px; font-size: 20px; letter-spacing: 0.02em; }
-    .hud p { margin: 0 0 12px; line-height: 1.4; color: #C9D1FF; }
-    .player { display: grid; gap: 10px; }
+    .hud::before,
+    .hud::after {
+      content: '';
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    .hud::before {
+      width: 80px;
+      height: 18px;
+      top: 12px;
+      left: 20px;
+      box-shadow: inset 0 0 18px rgba(255,255,255,0.18);
+    }
+    .hud::after {
+      width: 42px;
+      height: 42px;
+      top: 16px;
+      right: 20px;
+      box-shadow: inset 0 0 18px rgba(255,255,255,0.12);
+    }
+    .hud h1 { margin: 0 0 8px; font-size: 20px; letter-spacing: 0.03em; }
+    .hud p { margin: 0 0 14px; line-height: 1.45; color: #bbc6ff; }
+    .player { display: grid; gap: 12px; }
     .player button,
     .player select,
     .player input[type=range] {
@@ -65,6 +88,10 @@
       <p>Load a track or choose a sample. The city road, stars, headlights, and car react to bass, treble and beat.</p>
       <div class="player">
         <div class="track-info">
+          <span class="label">Now playing</span>
+          <span class="value" id="trackTitle">Electric Pulse</span>
+        </div>
+        <div class="track-info">
           <span class="label">Current palette</span>
           <span class="value" id="moodLabel">Electric Blue</span>
         </div>
@@ -79,8 +106,8 @@
         </div>
         <select id="sampleSelect">
           <option value="">Choose sample track</option>
-          <option value="https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3">Sample 1</option>
-          <option value="https://interactive-examples.mdn.mozilla.net/media/examples/flower.mp3">Sample 2</option>
+          <option value="https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3" data-title="Neon Drive">Sample 1</option>
+          <option value="https://interactive-examples.mdn.mozilla.net/media/examples/flower.mp3" data-title="Flower Glow">Sample 2</option>
         </select>
         <div class="actions">
           <button id="prevBtn">Prev</button>
@@ -109,6 +136,7 @@
     const sampleSelect = document.getElementById('sampleSelect');
     const presetSelect = document.getElementById('presetSelect');
     const moodLabel = document.getElementById('moodLabel');
+    const trackTitle = document.getElementById('trackTitle');
     const bassMeter = document.getElementById('bassMeter');
     const midMeter = document.getElementById('midMeter');
     const trebleMeter = document.getElementById('trebleMeter');
@@ -149,9 +177,9 @@
     };
 
     const playlist = [
-      { title: 'Offline drive', src: '' },
-      { title: 'Sample 1', src: 'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3' },
-      { title: 'Sample 2', src: 'https://interactive-examples.mdn.mozilla.net/media/examples/flower.mp3' }
+      { title: 'Neon Drive', src: 'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3' },
+      { title: 'City Pulse', src: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_d33fa3d043.mp3?filename=funky-city-11316.mp3' },
+      { title: 'Vaporwave Night', src: 'https://cdn.pixabay.com/download/audio/2022/03/16/audio_e1f4b5b814.mp3?filename=neon-vaporwave-11346.mp3' }
     ];
     let currentIndex = 0;
 
@@ -198,10 +226,15 @@
       }
     }
 
+    function updateTrackTitle() {
+      trackTitle.textContent = playlist[currentIndex].title || 'Unknown track';
+    }
+
     function loadSong(index) {
       if (playlist[index].src) {
         audioEl.src = playlist[index].src;
       }
+      updateTrackTitle();
     }
 
     function pickPalette(key) {
@@ -254,7 +287,7 @@
         radius: Math.random() * 1.8 + 0.8,
         brightness: Math.random() * 0.5 + 0.3,
         phase: Math.random() * Math.PI * 2
-n      }));
+      }));
     }
 
     function initRoad() {
@@ -482,14 +515,17 @@ n      }));
       if (!file) return;
       const url = URL.createObjectURL(file);
       audioEl.src = url;
+      trackTitle.textContent = file.name;
       audioEl.play();
       playBtn.textContent = 'Pause';
     });
 
     sampleSelect.addEventListener('change', event => {
       const src = event.target.value;
+      const selectedTitle = event.target.selectedOptions[0]?.dataset.title || 'Sample Track';
       if (!src) return;
       audioEl.src = src;
+      trackTitle.textContent = selectedTitle;
       audioEl.play();
       playBtn.textContent = 'Pause';
     });
