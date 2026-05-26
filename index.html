@@ -1,1 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Drive — Music-Reactive Endless Road</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #0a0022, #1a0033, #000);
+      color: white;
+      font-family: 'Courier New', monospace;
+      position: relative;
+    }
 
+    /* Background Neon Shift */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #00ffff, #ff00ff, #ffff00, #ff0080, #00ffcc);
+      opacity: 0.16;
+      animation: bgShift 15s infinite linear;
+      z-index: 1;
+    }
+
+    @keyframes bgShift {
+      0%   { background-position: 0% 50%; filter: hue-rotate(0deg); }
+      25%  { background-position: 50% 50%; filter: hue-rotate(70deg); }
+      50%  { background-position: 100% 50%; filter: hue-rotate(140deg); }
+      75%  { background-position: 50% 50%; filter: hue-rotate(210deg); }
+      100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+    }
+
+    /* Title */
+    .title {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 4.2rem;
+      font-weight: bold;
+      text-align: center;
+      z-index: 10;
+      text-shadow: 0 0 30px #ff00ff,
+                   0 0 60px #00ffff;
+      letter-spacing: 8px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.8;
+      margin-top: 10px;
+      letter-spacing: 4px;
+    }
+
+    /* Huge Equalizer */
+    .equalizer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 68%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 20px;
+      padding-bottom: 110px;
+      z-index: 2;
+    }
+
+    .bar {
+      width: 42px;
+      background: linear-gradient(to top, #ff00ff, #00ffff, #ffff00, #ff0080);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 0 40px #ff00ff,
+                  0 0 70px #00ffff,
+                  0 0 100px #ffff00;
+      animation: barMove 0.3s infinite alternate ease-in-out;
+    }
+
+    .bar:nth-child(1) { height: 35%; animation-delay: 0ms; }
+    .bar:nth-child(2) { height: 68%; animation-delay: 50ms; }
+    .bar:nth-child(3) { height: 40%; animation-delay: 120ms; }
+    .bar:nth-child(4) { height: 85%; animation-delay: 20ms; }
+    .bar:nth-child(5) { height: 52%; animation-delay: 170ms; }
+    .bar:nth-child(6) { height: 78%; animation-delay: 65ms; }
+    .bar:nth-child(7) { height: 45%; animation-delay: 105ms; }
+    .bar:nth-child(8) { height: 82%; animation-delay: 35ms; }
+    .bar:nth-child(9) { height: 62%; animation-delay: 145ms; }
+    .bar:nth-child(10){ height: 48%; animation-delay: 80ms; }
+
+    @keyframes barMove {
+      from { height: 22%; }
+      to   { height: 96%; }
+    }
+
+    /* Road */
+    .road {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to bottom, transparent, #0a0a1a);
+      z-index: 3;
+      perspective: 950px;
+    }
+
+    .road::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 160%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 36px,
+        #ff00ff 36px,
+        #ff00ff 42px
+      );
+      transform: rotateX(70deg) scale(1.7);
+      animation: roadMove 1.35s linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes roadMove {
+      from { background-position-y: 0; }
+      to   { background-position-y: 280px; }
+    }
+
+    /* Side Details */
+    .road-details {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      z-index: 4;
+      background: repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(0,255,255,0.12) 82px, rgba(0,255,255,0.12) 88px);
+      animation: detailsMove 1.35s linear infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes detailsMove {
+      from { background-position-x: 0; }
+      to   { background-position-x: -160px; }
+    }
+
+    /* Purple R34 Skyline */
+    .car {
+      position: absolute;
+      bottom: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      z-index: 5;
+      filter: drop-shadow(0 25px 35px #ff00ff);
+      animation: carIdle 1s infinite alternate ease-in-out;
+    }
+
+    @keyframes carIdle {
+      from { transform: translateX(-50%) translateY(0); }
+      to   { transform: translateX(-50%) translateY(-8px); }
+    }
+
+    .wheel {
+      animation: spin 0.32s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* Start Text */
+    .start-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.4rem;
+      z-index: 20;
+      text-shadow: 0 0 20px #00ffff;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="title">
+    ▮ NEON DRIVE ▮
+    <div class="subtitle">ENDLESS ROAD</div>
+  </h1>
+
+  <!-- Huge Equalizer -->
+  <div class="equalizer">
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <!-- Road -->
+  <div class="road"></div>
+  <div class="road-details"></div>
+
+  <!-- Purple R34 Car -->
+  <svg class="car" viewBox="0 0 260 115" xmlns="http://www.w3.org/2000/svg">
+    <path d="M25 70 Q25 48 52 42 Q110 28 198 38 Q228 46 238 68 Q238 85 218 91 L48 91 Q32 85 25 70" fill="#3a0f3a" stroke="#00ffff" stroke-width="14"/>
+    <path d="M38 79 Q50 87 210 87" fill="#1f0828"/>
+    <path d="M68 50 Q90 38 130 38 Q170 40 188 54 L178 68 L78 68 Z" fill="#0c1428" stroke="#00ffff" stroke-width="7"/>
+    <rect x="222" y="64" width="19" height="17" rx="4" fill="#ffee33"/>
+    <rect x="24" y="68" width="16" height="19" rx="3" fill="#ff0066"/>
+    <rect x="32" y="72" width="48" height="13" rx="4" fill="#111"/>
+    <!-- Wheels -->
+    <g class="wheel">
+      <circle cx="78" cy="90" r="23" fill="#0a0a0a" stroke="#00ffff" stroke-width="13"/>
+      <circle cx="78" cy="90" r="13" fill="#222"/>
+      <circle cx="78" cy="90" r="7" fill="#555"/>
+    </g>
+    <g class="wheel">
+      <circle cx="178" cy="90" r="23" fill="#0a0a0a" stroke="#00ffff" stroke-width="13"/>
+      <circle cx="178" cy="90" r="13" fill="#222"/>
+      <circle cx="178" cy="90" r="7" fill="#555"/>
+    </g>
+    <!-- Spoiler -->
+    <rect x="185" y="38" width="52" height="10" rx="2" fill="#ff00aa"/>
+  </svg>
+
+  <div class="start-text">PRESS PLAY TO START THE DRIVE</div>
+
+</body>
+</html>
