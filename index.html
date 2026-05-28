@@ -113,10 +113,11 @@ Promise.all([import(aUrl), import(bUrl)]).then(([app, page]) => {
 (function(){
   const eq=document.createElement('canvas'); eq.id='mrt-eq';
   const bg=document.createElement('div'); bg.id='mrt-bg-pulse';
-  const add=()=>{document.body.appendChild(bg);document.body.appendChild(eq);resize();};
+  const add=()=>{if(!bg.isConnected) document.body.appendChild(bg); if(!eq.isConnected) document.body.appendChild(eq); resize();};
   function resize(){eq.width=window.innerWidth*devicePixelRatio;eq.height=54*devicePixelRatio;eq.style.width=window.innerWidth+'px';}
   window.addEventListener('resize',resize);
   if(document.body) add(); else window.addEventListener('DOMContentLoaded',add);
+  setTimeout(add,250); setTimeout(add,1000);
 
   let ctx, analyser, data, wired=new WeakSet(), level=0;
   // Time warp: accelerate rAF / performance.now based on audio loudness
@@ -124,11 +125,23 @@ Promise.all([import(aUrl), import(bUrl)]).then(([app, page]) => {
   performance.now=function(){ const t=_now(); _virt+=(t-_last)*(1+level*1.8); _last=t; return _virt; };
   const _D=Date.now; Date.now=function(){ return Math.round(performance.now()+ (_D()-_now())); };
 
+  function prepareSources(a){
+    const src=a.getAttribute('src')||a.src||'';
+    const m=src.match(/audio\/[^?#]+\.mp3/i);
+    if(!m || a.dataset.mrtPrepared===m[0]) return;
+    a.pause();
+    while(a.firstChild) a.removeChild(a.firstChild);
+    a.removeAttribute('src');
+    const local=document.createElement('source'); local.src=m[0]; local.type='audio/mpeg';
+    const hosted=document.createElement('source'); hosted.src='https://mricetower.lovable.app/'+m[0]; hosted.type='audio/mpeg';
+    a.appendChild(local); a.appendChild(hosted);
+    a.dataset.mrtPrepared=m[0];
+    a.load();
+  }
   function wire(a){
     if(wired.has(a)) return;
     try{
       ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
-      try{a.crossOrigin='anonymous';}catch(e){}
       const src=ctx.createMediaElementSource(a);
       analyser=ctx.createAnalyser(); analyser.fftSize=256; analyser.smoothingTimeConstant=0.82;
       data=new Uint8Array(analyser.frequencyBinCount);
@@ -140,10 +153,11 @@ Promise.all([import(aUrl), import(bUrl)]).then(([app, page]) => {
   }
   // intercept play
   const origPlay=HTMLMediaElement.prototype.play;
-  HTMLMediaElement.prototype.play=function(){ if(this instanceof HTMLAudioElement){ wire(this); } return origPlay.apply(this,arguments); };
+  HTMLMediaElement.prototype.play=function(){ if(this instanceof HTMLAudioElement){ window.__mrtLastAudio=this; prepareSources(this); wire(this); } return origPlay.apply(this,arguments); };
 
   function draw(){
     requestAnimationFrame(draw);
+    if(!eq.isConnected || !bg.isConnected) add();
     const c=eq.getContext('2d'); c.clearRect(0,0,eq.width,eq.height);
     if(!analyser){ return; }
     analyser.getByteFrequencyData(data);
