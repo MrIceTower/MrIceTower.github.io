@@ -204,66 +204,77 @@ const TRACKS = [
 // ============ STATE ============
 let trackIdx=0, songIdx=0, playing=false, volume=0.6, gameMode=false, boomHidden=false;
 let audioEl=null, audioCtx=null, analyser=null, srcNode=null;
+let audioReady=false;
 const pal = () => TRACKS[trackIdx].palette;
 const song = () => TRACKS[trackIdx].songs[songIdx % TRACKS[trackIdx].songs.length];
 
 // ============ AUDIO ============
 function ensureAudio(){
-  if(!audioEl){ audioEl=new Audio(); audioEl.preload="auto";
-    audioEl.addEventListener("ended", handleNext); }
-  if(!audioCtx){
-    try{
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new Ctx();
-      // Try to set up analyser. This only works when the audio source allows CORS
-      // (the cross-origin mp3s here may not). If it throws, we fall back to plain
-      // playback without a visualiser so the play button still works.
-      try{
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 1024;
-        analyser.smoothingTimeConstant = 0.75;
-        srcNode = audioCtx.createMediaElementSource(audioEl);
-        srcNode.connect(analyser);
-        analyser.connect(audioCtx.destination);
-      }catch(err){
-        console.warn("Analyser unavailable (CORS), playing without visualiser:", err);
-        analyser = null;
-      }
-    }catch(e){ /* no Web Audio: still allow <audio> playback */ }
+  if(!audioEl){
+    audioEl = new Audio();
+    audioEl.preload = "auto";
+    audioEl.playsInline = true;
+    audioEl.addEventListener("ended", handleNext);
+    audioEl.addEventListener("error", () => {
+      playing = false;
+      renderUI();
+      console.warn("Audio failed to load. If this is on GitHub Pages, self-host the /audio folder next to index.html.");
+    });
   }
-  return audioCtx;
+  return audioEl;
 }
-function loadAndPlay(autoplay){
+function setSongSource(){
   ensureAudio();
   const s = song();
-  if(!audioEl.src.endsWith(s.src.split("/").pop())) audioEl.src = s.src;
+  const fileName = s.src.split("/").pop();
+  if(!audioEl.src || !audioEl.src.endsWith(fileName)){
+    audioEl.src = s.src;
+    audioReady = false;
+  }
   audioEl.volume = volume;
-  if(autoplay) audioEl.play().catch(()=>{});
+}
+function loadAndPlay(autoplay){
+  setSongSource();
+  if(autoplay){
+    audioEl.play().then(()=>{ playing=true; audioReady=true; renderUI(); }).catch(err=>{
+      playing=false;
+      console.warn("Audio play blocked or unavailable:", err);
+      renderUI();
+    });
+  }
 }
 async function handlePlay(){
-  const ctx = ensureAudio();
-  if(ctx.state==="suspended") await ctx.resume();
-  if(playing){ audioEl.pause(); playing=false; }
-  else {
-    const s = song();
-    if(!audioEl.src.endsWith(s.src.split("/").pop())) audioEl.src=s.src;
-    audioEl.volume = volume;
-    try{ await audioEl.play(); playing=true; setBoomHidden(true);}catch(e){}
+  setSongSource();
+  if(playing){
+    audioEl.pause();
+    playing=false;
+  } else {
+    try{
+      await audioEl.play();
+      playing=true;
+      audioReady=true;
+      setBoomHidden(true);
+    }catch(err){
+      playing=false;
+      console.warn("Audio play failed:", err);
+    }
   }
   renderUI();
 }
 function handleNext(){
+  const wasPlaying = playing;
   const tot = TRACKS[trackIdx].songs.length;
   if(songIdx+1<tot) songIdx++;
   else { trackIdx=(trackIdx+1)%TRACKS.length; songIdx=0; }
-  loadAndPlay(playing); renderUI();
+  loadAndPlay(wasPlaying); renderUI();
 }
 function handlePrev(){
+  const wasPlaying = playing;
   if(songIdx>0) songIdx--;
   else { trackIdx=(trackIdx-1+TRACKS.length)%TRACKS.length; songIdx=TRACKS[trackIdx].songs.length-1; }
-  loadAndPlay(playing); renderUI();
+  loadAndPlay(wasPlaying); renderUI();
 }
-function pickStation(i){ trackIdx=i; songIdx=0; loadAndPlay(playing); renderUI(); }
+function pickStation(i){ const wasPlaying = playing; trackIdx=i; songIdx=0; loadAndPlay(wasPlaying); renderUI(); }
 function setBoomHidden(v){ boomHidden=v; renderUI(); }
 
 // ============ UI RENDER ============
@@ -352,7 +363,15 @@ document.getElementById("prevBtn").addEventListener("click",handlePrev);
 document.getElementById("vol").addEventListener("input",e=>{volume=+e.target.value; if(audioEl) audioEl.volume=volume;});
 document.getElementById("hideX").addEventListener("click",()=>setBoomHidden(true));
 document.getElementById("radioBtn").addEventListener("click",()=>setBoomHidden(false));
-document.getElementById("gameBtn").addEventListener("click",()=>{gameMode=!gameMode; if(gameMode) resetGame(); renderUI();});
+document.getElementById("gameBtn").addEventListener("click",()=>{
+  gameMode=!gameMode;
+  if(gameMode){
+    resetGame();
+    setBoomHidden(true);
+  } else {
+    renderUI();
+  }
+});
 
 // ============ BACKGROUND CANVAS ============
 const bg = document.getElementById("bg");
