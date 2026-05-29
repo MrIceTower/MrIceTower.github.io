@@ -209,17 +209,27 @@ const song = () => TRACKS[trackIdx].songs[songIdx % TRACKS[trackIdx].songs.lengt
 
 // ============ AUDIO ============
 function ensureAudio(){
-  if(!audioEl){ audioEl=new Audio(); audioEl.crossOrigin="anonymous"; audioEl.preload="auto";
+  if(!audioEl){ audioEl=new Audio(); audioEl.preload="auto";
     audioEl.addEventListener("ended", handleNext); }
   if(!audioCtx){
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new Ctx();
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 1024;
-    analyser.smoothingTimeConstant = 0.75;
-    srcNode = audioCtx.createMediaElementSource(audioEl);
-    srcNode.connect(analyser);
-    analyser.connect(audioCtx.destination);
+    try{
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new Ctx();
+      // Try to set up analyser. This only works when the audio source allows CORS
+      // (the cross-origin mp3s here may not). If it throws, we fall back to plain
+      // playback without a visualiser so the play button still works.
+      try{
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.75;
+        srcNode = audioCtx.createMediaElementSource(audioEl);
+        srcNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+      }catch(err){
+        console.warn("Analyser unavailable (CORS), playing without visualiser:", err);
+        analyser = null;
+      }
+    }catch(e){ /* no Web Audio: still allow <audio> playback */ }
   }
   return audioCtx;
 }
